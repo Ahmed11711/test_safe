@@ -59,7 +59,6 @@ class AuthController extends Controller
             'email' => $request['email'],
             'phone' => $request['phone'],
             'comming_afflite'=>$request['comming_afflite'],
-
             'password' => Hash::make($request['password']),
         ]);
         $this->verifyEmail($request);
