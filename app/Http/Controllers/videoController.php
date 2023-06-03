@@ -1,24 +1,59 @@
 <?php
 
 namespace App\Http\Controllers;
+use Image;
 
-use Illuminate\Http\Request;
+use FFMpeg\FFMpeg;
+use FFMpeg\Coordinate\TimeCode;
 use App\Models\video;
-use Kreait\Firebase\Contract\DynamicLinks;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Http;
+use Spatie\Browsershot\Browsershot;
+
+
+
 
 
 class videoController extends Controller
 {
+    // public function __construct()
+    // {
+    //     $this->middleware('auth:api');
+    // }
+
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
+
+
+    //  public function __construct()
+    //  {
+    //      $this->middleware('auth:api'
+    //     );
+    //  }
     public function index()
     {
-        $videos=video::select('id','title','img','desc','name','created_at')->get();
+//         $jsonPayload = '{
+//             "dynamicLinkInfo": {
+//               "domainUriPrefix": "https://example.page.link",
+//               "link": "https://www.example.com/",
+//               "androidInfo": {
+//                 "androidPackageName": "com.example.android"
+//               },
+//               "iosInfo": {
+//                 "iosBundleId": "com.example.ios"
+//               }
+//             }
+//           }';
 
-         return response()->json($videos,200);
+// $test=Http::POST('https://firebasedynamiclinks.googleapis.com/v1/shortLinks?key=api_key',$jsonPayload);
+
+
+        $videos=video::select('id','title','img','desc','video','created_at')->get();
+        return response()->json($videos);
     }
 
     /**
@@ -40,22 +75,54 @@ class videoController extends Controller
     public function store(Request $request)
     {
 
-        if($request->hasFile('image')) {
-            $image = Image::make($request->file('image'));
+    // return response()->json(public_path('Screen_video'));
 
-            return $image;
+
+
+
+// for video
+        if($request->hasFile('img')) {
+            // dd(150);
+            $video=time(). '.'.$request->video->extension();
+           $path= $request->video->move(public_path('Videos'),$video);
+
+
+        $screenshot = video::url($path)
+        ->setDelay(2000) // Delay in milliseconds (optional)
+        ->setWidth(1280) // Screenshot width in pixels (optional)
+        ->setHeight(720) // Screenshot height in pixels (optional)
+        ->screenshot();
+        $screenshot->save(public_path('Videos/img'));
+        dd(150);
+
+    }
+
+
+
+
+
+
+
+
+        // for image
+        if($request->hasFile('img')) {
+          $image=time(). '.'.$request->img->extension();
+           $pathss= $request->img->move(public_path('videosthumbnails'),$image);
         }
 
-
+          return response()->json(public_path('videosthumbnails/'.$image));
+        // return $this->extractThumbnail($pathss);
 
         $videos=video::create([
             'title'=>$request['title'],
-            'img'=>$request['img'],
+            'img'=>$image,
             'desc'=>$request['desc'],
-            'name'=>$request['name'],
+            'name'=>11,
         ]);
 
-        return response()->json('ok', 200);
+        return response()->json($videos, 200,);
+
+        // return response()->json('ok', 200);
     }
 
     /**
@@ -102,4 +169,21 @@ class videoController extends Controller
     {
         //
     }
+
+    public function extractThumbnail($videoPath)
+{
+
+
+    // $response = Http::get('POST https://firebasedynamiclinks.googleapis.com/v1/shortLinks?key=api_key
+    // Content-Type: application/json
+
+    // {
+    //    "longDynamicLink": "https://example.page.link/?link=https://www.example.com/&apn=com.example.android&ibi=com.example.ios"
+    // }'
+
+
+//
+// );
+
+}
 }

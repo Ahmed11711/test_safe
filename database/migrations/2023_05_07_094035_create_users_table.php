@@ -20,8 +20,8 @@ return new class extends Migration
 
             $table->string('password');
             $table->rememberToken();
-            $table->integer('phone');
-            $table->string('state')->default('');
+            $table->string('phone');
+            $table->string('state')->default('user');
             $table->bigInteger('plan_id')->unsigned()->nullable();
             $table->foreign('plan_id')->references('id')->on('planes');
             $table->string('payment_method')->default('');

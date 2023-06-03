@@ -1,6 +1,9 @@
 <?php
 
+use App\Events\recommend;
+use App\Models\recommendation;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\RecommendationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,5 +17,19 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
+
+
     return view('welcome');
 });
+
+Route::get('telegrem',[RecommendationController::class,'update_telgrame']);
+
+
+// Route::get('app',function(){
+
+// $user=recommendation::find(38)->plan;
+
+// return $user;
+
+
+// });

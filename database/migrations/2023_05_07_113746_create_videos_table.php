@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('title');
             $table->string('img');
             $table->text('desc');
-            $table->string('name');
+            $table->string('video');
 
             $table->timestamps();
         });

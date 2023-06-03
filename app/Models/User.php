@@ -30,7 +30,10 @@ class User extends Authenticatable implements JWTSubject
         'plan',
         'affiliate_code',
         'affiliate_link',
-      
+        'comming_afflite',
+        'number_of_user',
+
+
     ];
 
     /**
@@ -66,5 +69,16 @@ class User extends Authenticatable implements JWTSubject
     public function getJWTCustomClaims()
     {
         return [];
+    }
+
+
+
+
+
+    // for recomndation
+
+    public function recommendation()
+    {
+        return $this->hasMany(recommendation::class);
     }
 }

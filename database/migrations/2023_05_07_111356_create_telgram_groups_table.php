@@ -13,10 +13,11 @@ return new class extends Migration
     {
         Schema::create('telgram_groups', function (Blueprint $table) {
             $table->id();
+            $table->text('title');
+
             $table->text('merchant');
             $table->text('token');
-            $table->bigInteger('plan_id')->unsigned();
-            $table->foreign('plan_id')->references('id')->on('planes');
+
             $table->timestamps();
         });
     }

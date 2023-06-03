@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->text('desc');
-            $table->text('plans');
             $table->boolean('archive');
             $table->date('start_archive');
             $table->string('img');
@@ -24,6 +23,10 @@ return new class extends Migration
             $table->integer('number_of_recived');
             $table->integer('number_show');
             $table->boolean('active');
+            $table->unsignedBigInteger('planes_id');
+
+            $table->foreign('planes_id')->references('id')->on('planes');
+
 
             $table->timestamps();
         });

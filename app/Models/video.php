@@ -14,7 +14,7 @@ class video extends Model
         'title',
         'img',
         'desc',
-        'name',
+        'video',
         'created_at'
     ];
 }

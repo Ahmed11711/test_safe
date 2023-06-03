@@ -7,9 +7,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use App\Mail\OtpMail;
 use App\Mail\ResetPasswordOtp;
-
-
-
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 
 class AuthController extends Controller
@@ -21,7 +19,7 @@ class AuthController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login','create','checkOtp','me','sendOtp','reSendOtp','resetPassword']]);
+        $this->middleware('auth:api', ['except' => ['login','create','checkOtp','me','sendOtp','reSendOtp','resetPassword','dymnamikeLink']]);
     }
 
     /**
@@ -32,11 +30,12 @@ class AuthController extends Controller
 
     public function create(Request $request){
         $validator =Validator::make($request->all(),
-            ['name'=>'required',
-            'email'=>'required|unique:users|email:rfc,dns',
+            [
+            'name'=>'required',
+            'email'=>'required|unique:users|email',
             'password'=>'required|min:8',
             'phone'=>'required',
-            'comming_afflite'=>'required|exists:users,comming_afflite',
+            //  'comming_afflite'=>'required|exists:users,affiliate_code',
 
             ]);
 
@@ -58,10 +57,12 @@ class AuthController extends Controller
             'name' => $request['name'],
             'email' => $request['email'],
             'phone' => $request['phone'],
+
             'comming_afflite'=>$request['comming_afflite'],
             'password' => Hash::make($request['password']),
         ]);
         $this->verifyEmail($request);
+
         return $this->login($request);
 
 
@@ -113,6 +114,7 @@ class AuthController extends Controller
         ];
         return response()->json($response);
     }
+    // cheackopt
         public function checkOtp(Request $request) {
         $email = $request->input('email');
         $otp = $request->input('otp');
@@ -127,8 +129,13 @@ class AuthController extends Controller
             $user->verified=true;
             $user->affiliate_code=  $this->generate_affiliate_code();
             $user->email_verified_at=time();
+            $user->affiliate_link=$this->dymnamikeLink();
 
             $user->save();
+            $user2=User::where('affiliate_code', $user->comming_afflite)->first();
+            $user2->number_of_user= $user2->number_of_user +1;
+            $user2->save();
+
 
             }
 
@@ -154,7 +161,7 @@ class AuthController extends Controller
 
         $user = User::where('email', $email)->first();
         if (!$user) {
-            return response()->json([                'success' => false,
+            return response()->json(['success' => false,
             'message' => 'Email address not found'], 200);
         }
         $userOtp=$user->otp;
@@ -167,9 +174,6 @@ class AuthController extends Controller
             $user->save();
 
             }
-
-
-
             $response = [
                 'success' => true,
                 'message' => 'Password Changed successfully'
@@ -184,7 +188,8 @@ class AuthController extends Controller
 
         return response()->json($response);
     }
-    function generate_affiliate_code()
+    function
+    generate_affiliate_code()
     {
         $code = '';
         $chars = array_merge(range('A', 'Z'), range(0, 9));
@@ -303,7 +308,7 @@ class AuthController extends Controller
     }
     public function reSendOtp(Request $data){
         // generate otp from 6 digits
-
+        $email=$data['email'];
         // send it to database
         try{
             $user = User::where('email', $email)->firstOrFail();
@@ -344,7 +349,7 @@ class AuthController extends Controller
      */
     public function refresh()
     {
-        return $this->respondWithToken(auth()->refresh());
+        // return $this->respondWithToken(auth()->refresh());
     }
 
     /**
@@ -355,4 +360,55 @@ class AuthController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
 
+
+
+    //  for plus number of user
+
+    public function number_user($affiliate_code)
+    {
+        $user=User::where('affiliate_code',$affiliate_code)->first();
+
+
+
+    $add= $user->number_of_user +1;
+        $user->update(
+            [
+                'number_of_user'=>$add
+            ]
+        );
+
+
+
+    }
+
+
+    public function dymnamikeLink()
+    {
+
+
+
+        $jsonData = [
+            'dynamicLinkInfo' => [
+                'domainUriPrefix' => 'https://smart123.page.link',
+                'link' => 'https://smartsolution-ar.com/?code=futfu',
+                'androidInfo' => [
+                    'androidPackageName' => 'com.example.safe',
+                ],
+                'iosInfo' => [
+                    'iosBundleId' => 'com.example.safe',
+                ],
+
+            ],
+        ];
+
+
+$response=Http::post('https://firebasedynamiclinks.googleapis.com/v1/shortLinks?key=AIzaSyCn_tqOc5ZxBvlOmBCXuVnp-yZ2sUD3qH8'
+,$jsonData);
+
+$data=json_decode($response);
+return $data->shortLink;
+
+
+
+    }
 }
